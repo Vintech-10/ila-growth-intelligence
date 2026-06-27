@@ -1,0 +1,69 @@
+/* Scale9X Growth Diagnostic — paged (paged.js) print layout.
+   Loaded only in the dedicated print window opened by printReport().
+   Rules are scoped to .pagedreport so they win over the in-app screen styles
+   and apply during pagination (paged.js measures on screen) AND at print time,
+   keeping the preview and the printed PDF identical. */
+
+@page{
+  size:A4;
+  margin:18mm 16mm 16mm;
+  @bottom-left{ content:"Scale9X — Growth Diagnostic"; font-family:"Inter",system-ui,sans-serif; font-size:8pt; color:#9aa3b0; }
+  @bottom-right{ content:"Strictly Confidential · Page " counter(page) " of " counter(pages); font-family:"Inter",system-ui,sans-serif; font-size:8pt; color:#9aa3b0; }
+}
+/* Cover = full-bleed first page, no footer */
+@page :first{ margin:0; }
+@page :first{ @bottom-left{ content:none } @bottom-right{ content:none } }
+
+html,body{ background:#fff; }
+body.pagedreport{ margin:0; font-size:10.6pt; line-height:1.55; color:#1f2733; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+.pagedreport *{ -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
+
+.pagedreport .report{ border:none !important; box-shadow:none !important; max-width:100% !important; border-radius:0 !important; margin:0 !important; background:#fff; overflow:visible !important; }
+.pagedreport .report-body{ padding:0 !important; }
+
+/* Cover fills the first page */
+.pagedreport .rcover{ break-after:page; min-height:295mm; box-sizing:border-box; display:flex; flex-direction:column; justify-content:center; padding:44mm 26mm; border-radius:0; }
+.pagedreport .rcover h1{ font-size:40pt; line-height:1.05; }
+.pagedreport .rcover .rc-kicker{ font-size:10pt; }
+.pagedreport .rcover .rc-meta{ font-size:11pt; }
+
+/* Each numbered section starts on a fresh page; exec summary sits alone on page two */
+.pagedreport .report-body>h2{ break-before:page; break-after:avoid; margin-top:0; padding-top:0; }
+.pagedreport h2{ break-after:avoid; }
+.pagedreport .tiny,.pagedreport .es-eyebrow,.pagedreport .es-divider{ break-after:avoid; }
+
+/* Keep logical blocks intact across page boundaries */
+.pagedreport .finding,
+.pagedreport .card,
+.pagedreport .callout,
+.pagedreport .execrow,
+.pagedreport .execsum,
+.pagedreport .es-outcome,
+.pagedreport .initiative,
+.pagedreport .revrow,
+.pagedreport .bet,
+.pagedreport .oppq,
+.pagedreport .planblock,
+.pagedreport .kpiq2,
+.pagedreport .fi-col,
+.pagedreport .radarwrap,
+.pagedreport .sb,
+.pagedreport .bb,
+.pagedreport .timeline .tl,
+.pagedreport .row.wrap>div,
+.pagedreport .frow{ break-inside:avoid; }
+
+/* Type sizing for paper */
+.pagedreport .report p,.pagedreport .frow .fv,.pagedreport li{ font-size:10.4pt; line-height:1.55; }
+.pagedreport .radar{ width:300px !important; height:auto; }
+
+/* Lift faint greys so they survive on paper */
+.pagedreport .muted,
+.pagedreport .rvw,
+.pagedreport .fiw,
+.pagedreport .bw,
+.pagedreport .ti2,
+.pagedreport .kw,
+.pagedreport .small{ color:#566070 !important; }
+
+.pagedreport img,.pagedreport svg{ max-width:100%; }

@@ -350,6 +350,7 @@ function renderReport(d){
   const company=esc((d.report&&d.report.company)||(S.company&&S.company.name)||'');
   const date=esc(((d.report&&d.report.published_at)||'').slice(0,10));
   let _sn=0; const sh=(title)=>`<h2><span class="h2num">${String(++_sn).padStart(2,'0')}</span>${title}</h2>`;
+  const scrubLegacy=(x)=>String(x||'').replace(/Magic Matrix/gi,'Growth Position Matrix').replace(/Best Client \(Huge Opportunity\)/gi,'High Growth Potential').replace(/Best Client/gi,'High Growth Potential');
   const KPIWHY={Business:'The headline numbers that prove the business is growing.',Marketing:'Whether demand generation is efficient and attributable.',Sales:'How reliably pipeline converts into revenue.',Customer:'Whether customers stay, expand and refer.',Operations:'Whether delivery keeps pace with growth.',Finance:'Whether growth is profitable and well-funded.'};
   const findings=kf.map((f,i)=>Object.assign({},nar[i]||{},f));
   const oqV2=(cls,label,sub,items)=>`<div class="oppq ${cls}"><div class="oh"><span class="od"></span>${label}</div><div class="small muted" style="margin:-2px 0 7px">${sub}</div>${(items&&items.length)?items.map(o=>`<div class="oi">• ${esc(o.title)}</div>`).join(''):'<div class="oi muted">—</div>'}</div>`;
@@ -375,11 +376,11 @@ function renderReport(d){
       <div style="display:flex;gap:30px;margin-top:24px;flex-wrap:wrap">${esNum('Growth maturity',ds.maturity?ds.maturity.total:null)}${esNum('Growth potential',ds.potential?ds.potential.total:null)}</div>
       <div class="es-divider"></div>
       <div class="tiny">Why we are here</div>
-      <p style="margin-top:8px;color:var(--ink-soft);line-height:1.7">${esc(ex.diagnosis||'')}</p>
+      <p style="margin-top:8px;color:var(--ink-soft);line-height:1.7">${esc(scrubLegacy(ex.diagnosis))}</p>
       <div class="es-divider"></div>
       <div class="tiny">Top three priorities</div>
       <div style="margin-top:12px;display:flex;flex-direction:column;gap:13px">${(ex.prescription||[]).slice(0,3).map((p,i)=>`<div style="display:flex;gap:13px"><div style="font-size:15px;font-weight:800;color:var(--accent);flex:0 0 auto;line-height:1.4">${String(i+1).padStart(2,'0')}</div><div style="font-size:14.5px;color:var(--ink);font-weight:600;padding-top:1px">${esc(p)}</div></div>`).join('')||'<div class="muted small">See strategic priorities.</div>'}</div>
-      ${ex.opportunity?`<div class="es-outcome"><div class="tiny" style="color:var(--accent-ink)">Expected outcome</div><p style="margin-top:7px;color:var(--ink-soft);line-height:1.65">${esc(ex.opportunity)}</p></div>`:''}
+      ${ex.opportunity?`<div class="es-outcome"><div class="tiny" style="color:var(--accent-ink)">Expected outcome</div><p style="margin-top:7px;color:var(--ink-soft);line-height:1.65">${esc(scrubLegacy(ex.opportunity))}</p></div>`:''}
     </div>
 
     ${sh('Current growth position')}<div class="row wrap" style="gap:30px">${scoreCol(t('db.maturity'),ds.maturity?ds.maturity.total:null,ds.maturity&&ds.maturity.label,ds.maturity&&ds.maturity.categories)}${scoreCol(t('db.potential'),ds.potential?ds.potential.total:null,ds.potential&&ds.potential.label,ds.potential&&ds.potential.categories)}</div>
@@ -408,17 +409,39 @@ function renderReport(d){
     <div class="tiny" style="margin:20px 0 8px">${t('r.kpi')}</div><div class="kpigrid">${kpis.map(k=>`<div class="kpiq2"><div class="kh"><span class="kn">${esc(k.layer)}</span></div><div class="kw">${esc(KPIWHY[k.layer]||'Key metrics to track for this layer.')}</div><div class="km"><span class="kdir">↗</span> ${(k.items||[]).map(esc).join(' · ')}</div></div>`).join('')}</div>
     <div style="margin-top:20px"><div class="tiny" style="margin-bottom:8px">${t('r.budget')}</div><div class="budgetbar">${budget.map(x=>`<div class="bb"><div class="bn">${esc(x.area)}</div><b>${x.pct}%</b><div class="bt"><i style="width:${x.pct}%"></i></div></div>`).join('')}</div></div>
 
-    ${sh('Appendix — methodology & evidence')}${s.business_reality?`<div class="callout"><div class="ttl">${t('r.reality')}</div><p>${esc(s.business_reality)}</p></div>`:''}
+    ${sh('Appendix — methodology & evidence')}${s.business_reality?`<div class="callout"><div class="ttl">${t('r.reality')}</div><p>${esc(scrubLegacy(s.business_reality))}</p></div>`:''}
     <p class="muted small" style="line-height:1.7;margin-top:12px">This diagnostic scores Growth Maturity (how built-out the business is today) and Growth Potential (the upside available) across weighted categories, drawn from a structured discovery interview and supporting evidence, and validated by a Scale9X analyst. The Growth Position Matrix plots maturity against potential to set the strategic priority. No figures are generated without analyst review.</p>
 
     <div class="divider"></div><div class="between"><div class="brand" style="padding:0"><div class="mark" style="width:26px;height:26px;font-size:11px">S9</div><div class="logo" style="font-size:14px">Scale<span class="t">9X</span> <span class="muted" style="font-weight:600">Growth Leadership</span></div></div><div class="muted small">${t('r.confidential')}</div></div>
     </div></div>`;
 }
+function printReport(id){
+  const d=S.reportSections[id]; if(!d){ window.print(); return; }
+  const company=(d.report&&d.report.company)||(S.company&&S.company.name)||'Client';
+  const lang=(localStorage.getItem('1xl_lang')||'en');
+  const O=location.origin;
+  const body=renderReport(d);
+  const w=window.open('','_blank');
+  if(!w){ try{toast('Please allow pop-ups so the report can open for download.');}catch(e){} return; }
+  w.document.open();
+  w.document.write('<!doctype html><html lang="'+lang+'"><head><meta charset="utf-8">'
+    +'<title>Scale9X — '+esc(company)+' Growth Diagnostic Report</title>'
+    +'<meta name="viewport" content="width=device-width, initial-scale=1">'
+    +'<link rel="preconnect" href="https://fonts.googleapis.com">'
+    +'<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
+    +'<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">'
+    +'<link rel="stylesheet" href="'+O+'/client/styles.css">'
+    +'<link rel="stylesheet" href="'+O+'/client/print.css">'
+    +'<scr'+'ipt>window.PagedConfig={auto:true,after:function(){setTimeout(function(){try{window.focus();window.print();}catch(e){}},400);}};</scr'+'ipt>'
+    +'<scr'+'ipt src="https://unpkg.com/pagedjs/dist/paged.polyfill.js"></scr'+'ipt>'
+    +'</head><body class="pagedreport">'+body+'</body></html>');
+  w.document.close();
+}
 function vReport(id){ const d=S.reportSections[id]; if(!d) return shell('reports',`<p class="muted">This report isn't available. <a href="#/reports" style="color:var(--accent)">Back to Report Center</a></p>`,'Report');
   // Name the page so the browser's "Save as PDF" filename = client + report type.
   const company=(d.report&&d.report.company)||(S.company&&S.company.name)||'Client';
   document.title='Scale9X — '+company+' Growth Diagnostic Report';
-  return shell('reports',`<div class="noprint between" style="margin-bottom:12px"><a href="#/reports" class="muted small" style="color:var(--accent)">← ${t('r.reportcenter')}</a><button class="btn ghost" onclick="window.print()">⤓ ${t('r.download')}</button></div>${renderReport(d)}`,t('nav.reports')); }
+  return shell('reports',`<div class="noprint between" style="margin-bottom:12px"><a href="#/reports" class="muted small" style="color:var(--accent)">← ${t('r.reportcenter')}</a><button class="btn ghost" onclick="printReport('${id}')">⤓ ${t('r.download')}</button></div>${renderReport(d)}`,t('nav.reports')); }
 function vReports(){ const rs=S.reports||[];
   return shell('reports',`<div class="eyebrow">${t('r.reportcenter')}</div><h1 class="h-title">${t('r.yourreports')}</h1><p class="muted">${t('r.reportsub')}</p>
    <div class="card pad" style="margin-top:14px">${rs.length?rs.map(r=>`<div class="checkrow"><div><b>${t('r.growthdiag')}</b> <span class="pill">v${r.version}</span><div class="muted small">${t('r.delivered')} ${esc((r.published_at||'').slice(0,10))}</div></div><a class="btn" href="#/report/${r.id}">${t('r.open')} →</a></div>`).join(''):'<div class="muted">No reports yet. Your report will appear here once your diagnostic is delivered.</div>'}</div>`,t('r.reportcenter')); }

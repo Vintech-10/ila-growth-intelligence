@@ -447,13 +447,37 @@ h1,h2,h3{margin:0;font-weight:800;letter-spacing:-.025em;color:var(--ink)}
 .fi-item .fiw{font-size:12px;color:var(--muted);margin-top:1px}
 
 @media print{
-  @page{margin:15mm}
-  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  @page{margin:14mm 14mm 15mm}
+  html,body{background:#fff!important}
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
   .rail,.topbar,.noprint{display:none!important}
-  .content{padding:0;max-width:100%}
+  .content{padding:0!important;max-width:100%!important;margin:0!important}
   .report{border:none;box-shadow:none;max-width:100%;border-radius:0}
-  .rcover{-webkit-print-color-adjust:exact;print-color-adjust:exact;break-after:page}
-  .finding,.card,.callout,.execrow,.execsum,.es-outcome,.initiative,.revrow,.bet,.oppq,.planblock,.kpiq2,.fi-col,.bp-phase{break-inside:avoid}
+  .report-body{padding:0!important}
+  body{font-size:10.7pt;line-height:1.5}
+  .report p,.report .frow .fv,.report li{font-size:10.5pt;line-height:1.55}
+
+  /* Cover fills page one, content vertically centred */
+  .rcover{break-after:page;min-height:80vh;display:flex;flex-direction:column;justify-content:center;padding:40px 44px}
+  .rcover h1{font-size:42px}
+
+  /* Each numbered section starts on a fresh page; the executive summary sits alone on page two */
+  .report-body>h2{break-before:page;padding-top:2px}
   .report h2{break-after:avoid}
+
+  /* Keep logical blocks from splitting across a page boundary */
+  .finding,.card,.callout,.execrow,.execsum,.es-outcome,.initiative,.revrow,.bet,.oppq,.planblock,.kpiq2,.fi-col,.bp-phase,.radarwrap,.sb,.bb,.timeline .tl{break-inside:avoid}
+  .row.wrap>div,.frow{break-inside:avoid}
+  .tiny,.es-eyebrow,.es-divider{break-after:avoid}
+
+  /* Radars: keep the pair together and sized for paper */
+  .radarwrap{gap:18px;break-inside:avoid}
+  .radar{width:300px!important}
+
+  /* Lift faint greys so they survive on paper */
+  .muted,.rvw,.fiw,.bw,.ti2,.kw,.small{color:#566070!important}
+  .frow .fv,.report-body>p{color:#2b3440!important}
+
+  p,li{orphans:3;widows:3}
 }
 @media(max-width:860px){.report-body{padding:16px 22px 36px}.rcover{padding:30px 24px}.rcover h1{font-size:28px}.execrow{grid-template-columns:1fr}.frow{grid-template-columns:1fr}.oppgrid,.execgrid{grid-template-columns:1fr}}
